@@ -4,8 +4,8 @@ import mysql.connector # version 8.0.24
 db_config = {
     'host': 'localhost',
     'user': 'root',
-    'password': 'Abhi@6362751007',
-    'database': 'DKG_ATM',
+    'password': 'your_password',
+    'database': 'your_database',
 }
 
 
