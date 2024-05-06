@@ -1,4 +1,4 @@
-import mysql.connector
+import mysql.connector # version 8.0.24
 
 # MySQL database configuration
 db_config = {
