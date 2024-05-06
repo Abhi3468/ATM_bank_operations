@@ -98,7 +98,7 @@ def main():
     while True:
         if len(card_details) == 4:
             print('Please select the following options:')
-            print('1.Balance \t 2.Withdraw \t 3.Deposit \t 4.Pin_change \t 5.Exit')
+            print('1.Balance \t 2.Withdraw \t 3.Deposit \t 4.Pin_change')
             user_input = int(input())
             if user_input == 1:
                 atm.available_balance()
