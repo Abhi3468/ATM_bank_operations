@@ -1,4 +1,4 @@
-import mysql.connector  # version 8.0.24
+import mysql.connector
 
 # MySQL database configuration
 db_config = {
@@ -33,19 +33,22 @@ class ATM:
         self.conn.close()
 
     def available_balance(self):
-        self.cursor.execute("SELECT balance FROM accounts WHERE card_pin = %s", (self.pin,))
-        # The %s in the query is  a placeholder for parameterized queries
-        result = self.cursor.fetchone()
-        # If pin matched with account in database.
-        # The fetchone() method is called on the cursor object to retrieve the result of the query.
-        # (By means if fetch available balance).
+        if self.pin:
+            self.cursor.execute("SELECT balance FROM accounts WHERE card_pin = %s", (self.pin,))
+            # The %s in the query is  a placeholder for parameterized queries
+            result = self.cursor.fetchone()
+            # If pin matched with account in database.
+            # The fetchone() method is called on the cursor object to retrieve the result of the query.
+            # (By means if fetch available balance).
 
-        if result:  # if result is not NONE
-            self.balance = result[0]
-            # The above line updates the balance attribute with the available balance fetched from the database.
-            print('The Available balance is:', self.balance)
+            if result:  # if result is not NONE
+                self.balance = result[0]
+                # The above line updates the balance attribute with the available balance fetched from the database.
+                print('The Available balance is:', self.balance)
+            else:
+                print('Error: Account not found')
         else:
-            print('Error: Account not found')
+            print('Error: PIN not set')
 
     def withdraw(self, amount):
         self.cursor.execute("SELECT balance FROM accounts WHERE card_pin = %s", (self.pin,))
@@ -58,8 +61,8 @@ class ATM:
                 # Amount is deducted from available_balance
                 self.cursor.execute("UPDATE accounts SET balance = balance - %s WHERE card_pin = %s", (amount, self.pin))
                 # update the withdraw_history column in the database
-                self.cursor.execute("UPDATE accounts SET withdraw_history = withdraw_history + %s WHERE card_pin = %s",
-                                    (amount, self.pin))
+                self.cursor.execute("INSERT INTO withdrawal_history (account_id, amount) SELECT id, %s FROM accounts"
+                                    " WHERE card_pin = %s",(amount, self.pin))
                 # commit the changes made in python code to the database
                 self.conn.commit()
                 print('The amount {} successfully withdrawn, \n___Please collect your cash___'.format(amount))
@@ -71,8 +74,9 @@ class ATM:
         # update the available_balance with deposit amount in database
         self.cursor.execute("UPDATE accounts SET balance = balance + %s WHERE card_pin = %s", (amount, self.pin))
         # update the deposit_history column in the database
-        self.cursor.execute("UPDATE accounts SET deposit_history = deposit_history + %s WHERE card_pin = %s",
-                            (amount, self.pin))
+        self.cursor.execute(
+            "INSERT INTO deposit_history (account_id, amount) SELECT id, %s FROM accounts WHERE card_pin = %s",
+            (amount, self.pin))
         # commit the changes made in python code to the database
         self.conn.commit()
         print('The amount {} is successfully deposited into your account'.format(amount))
@@ -98,7 +102,7 @@ def main():
     while True:
         if len(card_details) == 4:
             print('Please select the following options:')
-            print('1.Balance \t 2.Withdraw \t 3.Deposit \t 4.Pin_change')
+            print('1.Balance \t 2.Withdraw \t 3.Deposit \t 4.Pin_change \t 5.Exit')
             user_input = int(input())
             if user_input == 1:
                 atm.available_balance()
